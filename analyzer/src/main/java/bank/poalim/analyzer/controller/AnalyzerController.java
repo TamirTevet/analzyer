@@ -1,21 +1,22 @@
 package bank.poalim.analyzer.controller;
 
 import bank.poalim.analyzer.exception.ApplicationException;
-import bank.poalim.analyzer.model.Target;
 import bank.poalim.analyzer.service.impl.AnalyzerServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Slf4j
 @RestController
-@RequestMapping("v1")
+@RequestMapping("/analyzer/v1")
 @RequiredArgsConstructor
 public class AnalyzerController {
 
@@ -23,14 +24,12 @@ public class AnalyzerController {
 
     @GetMapping(value = "/advice", consumes = {"application/json"})
     public ResponseEntity<String> getAdvice () throws ApplicationException {
-
-        return null;
+        return new ResponseEntity<>(analyzerService.getRecommendationToApproveYourFinancial(), HttpStatus.OK);
     }
 
     @GetMapping(value = "/target", consumes = {"application/json"})
-    public ResponseEntity<Target> getOptionToGetTarget (@PathVariable String target, Date dateToGetTarget) throws ApplicationException {
-
-        return null;
+    public ResponseEntity<String> getOptionToGetTarget (@PathVariable String target, LocalDateTime dateToGetTarget) throws ApplicationException {
+        String getTarget = analyzerService.getYourOptionForGetTarget(target, dateToGetTarget);
+        return new ResponseEntity<>(getTarget, HttpStatus.OK);
     }
 }
-

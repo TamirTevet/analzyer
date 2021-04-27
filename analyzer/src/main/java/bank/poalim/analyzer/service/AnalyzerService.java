@@ -1,10 +1,11 @@
 package bank.poalim.analyzer.service;
 
 import bank.poalim.analyzer.exception.ApplicationException;
-import bank.poalim.analyzer.model.Target;
+
+import java.time.LocalDateTime;
 
 public interface AnalyzerService {
 
     String getRecommendationToApproveYourFinancial() throws ApplicationException;
-    Target getYourOptionForGetTarget() throws ApplicationException;
+    String getYourOptionForGetTarget(String target, LocalDateTime dateToGetTarget) throws ApplicationException;
 }

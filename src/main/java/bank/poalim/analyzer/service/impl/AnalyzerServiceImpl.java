@@ -5,9 +5,13 @@ import bank.poalim.analyzer.service.AnalyzerService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Component
 @Slf4j
 @Data
 @RequiredArgsConstructor
@@ -19,7 +23,7 @@ public class AnalyzerServiceImpl implements AnalyzerService {
     }
 
     @Override
-    public String getYourOptionForGetTarget(String target, LocalDateTime dateToGetTarget) throws ApplicationException {
+    public String getYourOptionForGetTarget(String target, LocalDate dateToGetTarget) throws ApplicationException {
         String optionToAchieveTarget = "Your option for get your target: \n";
         // need to take from api
         int currentAccountAmount = 20;

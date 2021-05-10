@@ -1,5 +1,6 @@
 package bank.poalim.analyzer.controller;
 
+import bank.poalim.analyzer.data.Target;
 import bank.poalim.analyzer.exception.ApplicationException;
 import bank.poalim.analyzer.service.impl.AnalyzerServiceImpl;
 import bank.poalim.analyzer.util.WebUtils;
@@ -35,9 +36,9 @@ public class AnalyzerController {
     }
 
 
-//    @PostMapping(value = "/target/{target}/{dateToGetTarget}")
-//    public ResponseEntity<Object> getOptionToGetTarget (HttpServletRequest request ,@PathVariable String target, @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateToGetTarget) throws Exception {
-//        Object getTarget = analyzerService.getYourOptionForGetTarget(request, target, dateToGetTarget);
-//        return new ResponseEntity<>(getTarget, HttpStatus.OK);
-//    }
+    @PostMapping(value = "/target")
+    public ResponseEntity<Object> getOptionToGetTarget (HttpServletRequest request , @RequestBody Target target) throws Exception {
+        Object getTarget = analyzerService.getYourOptionForGetTarget(request, target);
+        return new ResponseEntity<>(getTarget, HttpStatus.OK);
+    }
 }

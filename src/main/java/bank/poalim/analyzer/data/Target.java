@@ -9,5 +9,5 @@ import java.util.Date;
 public class Target {
     public LocalDate date;
     public Integer price;
-    public Integer target;
+    public String target;
 }

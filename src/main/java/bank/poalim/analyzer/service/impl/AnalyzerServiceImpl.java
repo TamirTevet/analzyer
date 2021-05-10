@@ -1,5 +1,8 @@
 package bank.poalim.analyzer.service.impl;
 
+
+import java.util.concurrent.ThreadLocalRandom;
+
 import bank.poalim.analyzer.data.Target;
 import bank.poalim.analyzer.service.AnalyzerService;
 import bank.poalim.analyzer.util.WebUtils;
@@ -24,6 +27,8 @@ public class AnalyzerServiceImpl implements AnalyzerService {
 
     final String validateJWTuri = "https://apim-team2.azure-api.net/v1/validate";
     final String invalidToken = "invalid token";
+    final Integer maxLoanMonth = 36;
+    final Float interestLoan = 3.0F;
 
     public boolean validateToken(HttpServletRequest request) throws Exception {
         Map<String, String> headers = WebUtils.getHeadersInfo(request);
@@ -64,37 +69,53 @@ public class AnalyzerServiceImpl implements AnalyzerService {
             return jsonObject.appendField("[ERROR]" , invalidToken);
         }
         Object accountData = getAccountDataFromJWT(request);
+        ////////////////////////////////////////////////////////
+        //todo request to shoval api
+        //static
+        int totalSavings = ThreadLocalRandom.current().nextInt(0, 70000);
+        int futureMonthlyySavings = ThreadLocalRandom.current().nextInt(0, 500);
+        int accountBalance = ThreadLocalRandom.current().nextInt(0, 10000);
+        int loanMonthlyPayment = ThreadLocalRandom.current().nextInt(0, 1500);
 
-
-        String optionToAchieveTarget = "Your option for get your target: \n";
-        // need to take from api
-        int currentAccountAmount = 20;
-        //create switch case that set the price according to target
-        int price = 100;
-        //create switch case that set the interest according to target
-        int annualInterest = 10;
-
-        if (currentAccountAmount * 1.5 > price) {
-            optionToAchieveTarget += "because you have more money in the account then you need we suggest to buy from what you have";
-        } else {
-            LocalDateTime now = LocalDateTime.now();
-            int timeToSave = 0;
-            int monthOfTargetDate = target.getDate().getYear();
-            int monthCurrent = now.getYear();
-            if (target.getDate().getYear() > now.getYear()) {
-                if (monthOfTargetDate > monthCurrent) {
-                    timeToSave = 12 + (monthOfTargetDate - monthCurrent);
-                }else {
-                    timeToSave = 12 - (monthCurrent - monthOfTargetDate);
-                }
-            } else {
-                timeToSave = monthOfTargetDate - monthCurrent;
+        //1.monthly savings check
+        LocalDateTime now = LocalDateTime.now();
+        int timeToSave = 0;
+        int monthOfTargetDate = target.getDate().getYear();
+        int monthCurrent = now.getYear();
+        if (target.getDate().getYear() > now.getYear()) {
+            if (monthOfTargetDate > monthCurrent) {
+                timeToSave = 12 + (monthOfTargetDate - monthCurrent);
+            }else {
+                timeToSave = 12 - (monthCurrent - monthOfTargetDate);
             }
-            optionToAchieveTarget += "you need to save: " + price/timeToSave + "every month to get your target on time\n";
-            int monthToRepayment = (price * annualInterest) / (price/timeToSave);
-            optionToAchieveTarget += "if you take loan with annual interest of your target type you need to pay for: " + monthToRepayment + "month";
+        } else {
+            timeToSave = monthOfTargetDate - monthCurrent;
         }
-        return jsonObject.appendField("[TARGET]", optionToAchieveTarget);
+        if (target.getPrice() <= timeToSave*futureMonthlyySavings){
+            jsonObject.appendField("[Future Monthly Savings]" , "YES");
+        }
+        //2. total account balance
+
+        if (accountBalance >= 1.5 * target.getPrice()){
+            jsonObject.appendField("[Account Balance]" , "YES");
+        }
+        //3. loans
+        if ((target.getPrice() * interestLoan) / maxLoanMonth <= loanMonthlyPayment){
+            jsonObject.appendField("[Loan Possibility]" , "YES");
+        }
+        //4. savings
+        if(target.getPrice() <= totalSavings){
+            jsonObject.appendField("[Pay with savings]" , "YES");
+
+        }
+        //end static
+
+        ////////////////////////////////////////////////////////////////
+
+       if (jsonObject.isEmpty()){
+           return jsonObject.appendField("[SORRY]", "go to work");
+       }
+        return jsonObject;
     }
 
     @Override

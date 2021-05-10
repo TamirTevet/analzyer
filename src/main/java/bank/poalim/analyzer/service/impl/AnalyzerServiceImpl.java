@@ -1,15 +1,18 @@
 package bank.poalim.analyzer.service.impl;
 
-import bank.poalim.analyzer.exception.ApplicationException;
 import bank.poalim.analyzer.service.AnalyzerService;
+import bank.poalim.analyzer.util.WebUtils;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import net.minidev.json.JSONObject;
 import org.springframework.stereotype.Component;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Component
 @Slf4j
@@ -17,13 +20,35 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AnalyzerServiceImpl implements AnalyzerService {
 
-    @Override
-    public String getRecommendationToApproveYourFinancial() throws ApplicationException {
-        return "We see you have a lot of loans in your account in rent of 9%, we suggest to take one loan for all in 5% rent and only to two years";
+    final String validateJWTuri = "https://apim-team2.azure-api.net/v1/validate";
+    final String invalidToken = "invalid token";
+
+    public boolean validateToken(HttpServletRequest request) throws Exception {
+        Map<String, String> headers = WebUtils.getHeadersInfo(request);
+        HttpResponse response = WebUtils.get(validateJWTuri , headers);
+        if (response.statusCode() != 200) {
+            return false;
+        }
+        return true;
     }
 
+    public JSONObject getRecommendationToApproveYourFinancial(HttpServletRequest request) throws Exception {
+        JSONObject jsonObject = new JSONObject();
+
+        if (!validateToken(request)){
+            return jsonObject.appendField("[ERROR]" , invalidToken);
+        }
+        return jsonObject.appendField("[ADVICE]", "We see you have a lot of loans in your account in rent of 9%, we suggest to take one loan for all in 5% rent and only to two years");
+    }
+
+
     @Override
-    public String getYourOptionForGetTarget(String target, LocalDate dateToGetTarget) throws ApplicationException {
+    public JSONObject getYourOptionForGetTarget(HttpServletRequest request, String target, LocalDate dateToGetTarget) throws Exception {
+        JSONObject jsonObject = new JSONObject();
+
+        if (!validateToken(request)){
+            return jsonObject.appendField("[ERROR]" , invalidToken);
+        }
         String optionToAchieveTarget = "Your option for get your target: \n";
         // need to take from api
         int currentAccountAmount = 20;
@@ -52,6 +77,6 @@ public class AnalyzerServiceImpl implements AnalyzerService {
             int monthToRepayment = (price * annualInterest) / (price/timeToSave);
             optionToAchieveTarget += "if you take loan with annual interest of your target type you need to pay for: " + monthToRepayment + "month";
         }
-        return optionToAchieveTarget;
+        return jsonObject.appendField("[TARGET]", optionToAchieveTarget);
     }
 }

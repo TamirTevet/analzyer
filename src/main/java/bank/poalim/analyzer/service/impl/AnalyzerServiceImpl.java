@@ -9,14 +9,17 @@ import bank.poalim.analyzer.exception.ApplicationException;
 import bank.poalim.analyzer.repository.TargetMongoRepository;
 import bank.poalim.analyzer.service.AnalyzerService;
 import bank.poalim.analyzer.util.WebUtils;
-import io.swagger.v3.core.util.Json;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.http.HttpResponse;
@@ -32,10 +35,8 @@ public class AnalyzerServiceImpl implements AnalyzerService {
     @Autowired
     private final TargetMongoRepository mongoTemplate;
     final String validateJWTuri = "https://apim-team2.azure-api.net/v1/validate";
-    final String currentAccountBalanceUri = "https://apim-team2.azure-api.net/ca/ca/balances/bank/1/account/1";
-    final String currentAccountLoansUri = "https://apim-team2.azure-api.net/ca/ca/loans/bank/{bank_id}/account/{account_id}";
-    final String currentAccountBalanceTmp = "/ca/balances/bank/{bank_id}/account/{account_id}";
-    final String currentAccountLoanTmp = "/ca/loans/bank/{bank_id}/account/{account_id}";
+    final String currentAccountBalanceUri = "https://apim-team2.azure-api.net/ca/ca/balances/bank/"; //{bank_id}/account/{account_id}
+    final String currentAccountLoansUri = "https://apim-team2.azure-api.net/ca/ca/loans/bank/"; //{bank_id}/account/{account_id}
     final String invalidToken = "invalid token";
     final Integer maxLoanMonth = 36;
     final Float interestLoan = 3.0F;
@@ -121,6 +122,9 @@ public class AnalyzerServiceImpl implements AnalyzerService {
 
     @Override
     public JSONObject getYourTarget(HttpServletRequest request) throws Exception {
+        ResponseEntity<String> balance = getBalanceFromCurrentAccount("5430670", "Latlux");
+        getLoansFromCurrentAccount("5430670", "Latlux");
+
         JSONObject jsonObject = new JSONObject();
 
         String accountId = request.getHeader("accountId"); //todo ask shimon to send is as a header? or change to path or w/e
@@ -131,7 +135,7 @@ public class AnalyzerServiceImpl implements AnalyzerService {
         return jsonObject.appendField("[TARGET]",  result.get().getAchievementOptions());
     }
 
-    public boolean validateToken(HttpServletRequest request) throws Exception {
+    private boolean validateToken(HttpServletRequest request) throws Exception {
         Map<String, String> headers = WebUtils.getHeadersInfo(request);
         HttpResponse response = WebUtils.get(validateJWTuri , headers);
         if (response.statusCode() != 200) {
@@ -140,12 +144,34 @@ public class AnalyzerServiceImpl implements AnalyzerService {
         return true;
     }
 
-    public Object getAccountDataFromJWT(HttpServletRequest request){
+    private Object getAccountDataFromJWT(HttpServletRequest request){
         String token = request.getHeader("x-jwt-assertion");
         Base64.Decoder decoder = Base64.getDecoder();
         String[] chunks = token.split("\\.");
         String accountDataObject = new String(decoder.decode(chunks[1]));
         return accountDataObject;
+    }
+
+    private ResponseEntity<String> getBalanceFromCurrentAccount(String accountId, String bankId) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = currentAccountBalanceUri + bankId + "/account/" + accountId;
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Host", "apim-team2.azure-api.net");
+        headers.add("Ocp-Apim-Subscription-Key", "f4c97a7149054869bced099b807d826f");
+        headers.add("Ocp-Apim-Trace", "true");
+        HttpEntity<String> entity = new HttpEntity<>("body", headers);
+        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+    }
+
+    private ResponseEntity<String> getLoansFromCurrentAccount(String accountId, String bankId) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = currentAccountLoansUri + bankId + "/account/" + accountId;
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Host", "apim-team2.azure-api.net");
+        headers.add("Ocp-Apim-Subscription-Key", "f4c97a7149054869bced099b807d826f");
+        headers.add("Ocp-Apim-Trace", "true");
+        HttpEntity<String> entity = new HttpEntity<>("body", headers);
+        return restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
     }
 
 }

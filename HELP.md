@@ -11,3 +11,6 @@ To get swagger json:
 http://localhost:8080/v3/api-docs/
 To get swaggerUI:
 http://localhost:8080/swagger-ui.html
+
+
+### mongo stackabuse.com/spring-data-mongodb-tutorial

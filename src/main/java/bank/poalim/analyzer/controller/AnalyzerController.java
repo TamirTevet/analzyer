@@ -29,9 +29,9 @@ public class AnalyzerController {
         return new ResponseEntity<>(analyzerService.getRecommendationToApproveYourFinancial(request), HttpStatus.OK);
     }
 
-    @GetMapping(value = "/target/{target}/{dateToGetTarget}")
-    public ResponseEntity<Object> getOptionToGetTarget (HttpServletRequest request ,@PathVariable String target, @PathVariable @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateToGetTarget) throws Exception {
-        Object getTarget = analyzerService.getYourOptionForGetTarget(request, target, dateToGetTarget);
+    @GetMapping(value = "/all-target")
+    public ResponseEntity<Object> getOptionToGetTarget (HttpServletRequest request) throws Exception {
+        Object getTarget = analyzerService.getYourTarget(request);
         return new ResponseEntity<>(getTarget, HttpStatus.OK);
     }
 

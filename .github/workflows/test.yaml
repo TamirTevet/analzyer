@@ -20,6 +20,6 @@ jobs:
         run: |
           az login --tenant sandboxbp.onmicrosoft.com 
           az acr login --name Team2Registry
-          docker build -t anal .
-          docker tag anal:latest team2registry.azurecr.io/analyzer:v1
+          docker build -t analyzer .
+          docker tag analyzer:latest team2registry.azurecr.io/analyzer:v1
           docker push team2registry.azurecr.io/analyzer:v1

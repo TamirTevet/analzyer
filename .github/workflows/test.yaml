@@ -15,9 +15,10 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
-      - name: Azure CLI Action
-        uses: Azure/cli@1.0.4
-        run: |
+
+    - name: Azure CLI Action
+    uses: Azure/cli@1.0.4
+    run: |
           az login --tenant sandboxbp.onmicrosoft.com 
           az acr login --name Team2Registry
           docker build -t analyzer .

@@ -1,5 +1,5 @@
 name: GitHub Actions Demo
-on: [push , ]
+on: [push  ]
 jobs:
   Explore-GitHub-Actions:
     runs-on: ubuntu-latest
@@ -17,9 +17,9 @@ jobs:
       - run: echo "🍏 This job's status is ${{ job.status }}."
       - name: Azure CLI Action
         uses: Azure/cli@1.0.4
-      - run: |
+        run: |
           az login --tenant sandboxbp.onmicrosoft.com 
-      - run:    az acr login --name Team2Registry
-      - run:    docker build -t anal .
-      - run:    docker tag anal:latest team2registry.azurecr.io/analyzer:v1
-      - run:    docker push team2registry.azurecr.io/analyzer:v1
+          az acr login --name Team2Registry
+          docker build -t anal .
+          docker tag anal:latest team2registry.azurecr.io/analyzer:v1
+          docker push team2registry.azurecr.io/analyzer:v1
